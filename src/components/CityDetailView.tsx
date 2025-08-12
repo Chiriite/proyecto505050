@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import type { City } from '../hooks/useMapState';
 import { createMapOptions, handleMapError, setupResizeHandler, CITY_DETAIL_ZOOM } from '../utils/mapConfig';
 import { useGPXTrack } from '../hooks/useGPXTrack';
+import PhotoGallery from './PhotoGallery';
 
 interface CityDetailViewProps {
   city: City;
@@ -11,11 +12,19 @@ interface CityDetailViewProps {
   prevCity?: City;
 }
 
+interface CityPhoto {
+  id: string;
+  photo_url: string;
+  caption?: string;
+}
+
 export default function CityDetailView({ city, nextCity, prevCity }: CityDetailViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [cityPhotos, setCityPhotos] = useState<CityPhoto[]>([]);
+  const [storyContent, setStoryContent] = useState<string>('');
 
   // Initialize map focused on the city
   useEffect(() => {
@@ -67,6 +76,27 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
 
   // Cargar track GPX basado en el city ID
   const { track, loading: trackLoading } = useGPXTrack(`/tracks/${city.id}.gpx`);
+
+  useEffect(() => {
+    const loadLocalPhotos = () => {
+      const cityId = city.id.toString();
+      const availableImages = ['1', '2', '3'];
+      
+      const localPhotos: CityPhoto[] = availableImages.map((imageNum) => ({
+        id: imageNum,
+        photo_url: `/images/${cityId}/${imageNum}.webp`,
+        caption: `Imagen ${imageNum} de ${city.name}`
+      }));
+      
+      setCityPhotos(localPhotos);
+    };
+    
+    loadLocalPhotos();
+    
+    // Mock story content
+    const mockStory = `My running journey through ${city.name} was truly memorable. The city's unique blend of history and modernity created the perfect backdrop for this adventure. Every step revealed new sights, sounds, and experiences that made this run special.`;
+    setStoryContent(mockStory);
+  }, [city.id, city.name]);
 
   // Add GPX track when track data becomes available
   useEffect(() => {
@@ -166,7 +196,7 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full overflow-hidden">
       {/* Loading State */}
       {isLoading && (
         <div className="absolute inset-0 bg-background/90 backdrop-blur-sm flex items-center justify-center z-[2000]">
@@ -177,123 +207,15 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
         </div>
       )}
 
-      {/* Map Container */}
+      {/* Fixed Map Container */}
       <div 
         ref={mapContainer} 
-        className="w-full h-full"
+        className="absolute inset-0 w-full h-full touch-pan-x touch-pan-y touch-pinch-zoom"
+        style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
       />
-
-      {/* City Information Panel */}
-      <div className="absolute inset-x-6 bottom-6 md:inset-x-auto md:bottom-6 md:left-6 md:w-96">
-        <div className="bg-black/95 border border-white/10 rounded-2xl backdrop-blur-3xl shadow-2xl shadow-black/60 overflow-hidden">
-          {/* Header */}
-          <div className="p-6 pb-4 border-b border-white/5">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  {city.name}
-                </h1>
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 border border-primary/30">
-                  <span className="text-primary font-semibold text-sm">
-                    Run #{city.order_number}
-                  </span>
-                </div>
-              </div>
-              <div className="text-right text-white/60 text-sm">
-                <div>{city.order_number}/50</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Details */}
-          <div className="p-6 space-y-4">
-            <div className="flex items-center text-white/80">
-              <svg className="w-5 h-5 mr-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>
-                {new Date(city.run_date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </span>
-            </div>
-            
-            {city.distance_km && (
-              <div className="flex items-center text-white/80">
-                <svg className="w-5 h-5 mr-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>{city.distance_km} kilometers</span>
-              </div>
-            )}
-
-            {city.description && (
-              <div className="pt-4 border-t border-white/5">
-                <p className="text-white/70 leading-relaxed">
-                  {city.description}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Navigation */}
-          <div className="px-6 pb-6">
-            <div className="flex items-center justify-between">
-              {prevCity ? (
-                <button
-                  onClick={() => navigateToCity(prevCity)}
-                  data-nav="prev"
-                  className={clsx(
-                    'flex items-center px-4 py-2 rounded-lg border',
-                    'bg-white/5 border-white/10 text-white/80',
-                    'hover:bg-white/10 hover:border-white/20 hover:text-white',
-                    'transition-all duration-200 group'
-                  )}
-                >
-                  <svg className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  <div className="text-left">
-                    <div className="text-xs text-white/50">Previous</div>
-                    <div className="font-medium">{prevCity.name}</div>
-                  </div>
-                </button>
-              ) : (
-                <div></div>
-              )}
-
-              {nextCity ? (
-                <button
-                  onClick={() => navigateToCity(nextCity)}
-                  data-nav="next"
-                  className={clsx(
-                    'flex items-center px-4 py-2 rounded-lg border',
-                    'bg-primary/10 border-primary/20 text-primary',
-                    'hover:bg-primary/20 hover:border-primary/30',
-                    'transition-all duration-200 group'
-                  )}
-                >
-                  <div className="text-right mr-2">
-                    <div className="text-xs text-primary/70">Next</div>
-                    <div className="font-medium">{nextCity.name}</div>
-                  </div>
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              ) : (
-                <div className="text-white/40 text-sm italic">Final destination</div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Map Controls */}
       <div className="absolute top-6 right-6 z-[1000] space-y-3">
-        {/* Zoom Controls */}
         <div className="bg-black/90 border border-white/20 rounded-lg backdrop-blur-2xl shadow-lg overflow-hidden">
           <button 
             onClick={() => map.current?.zoomIn()}
@@ -313,6 +235,181 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
             </svg>
           </button>
+        </div>
+      </div>
+
+      {/* Unified Scrollable Content Panel */}
+      <div className="absolute inset-x-0 md:inset-x-auto md:left-0 md:w-96 bottom-0 max-h-[85vh] overflow-y-auto z-[1500] overscroll-behavior-contain"
+           style={{ touchAction: 'pan-y' }}
+      >
+        <div className="bg-gradient-to-t from-black via-black/98 to-transparent md:bg-gradient-to-r md:from-black md:via-black/98 md:to-transparent">
+          {/* Spacer for initial positioning - shows map content */}
+          <div 
+            className="h-[45vh]" 
+            style={{ 
+              pointerEvents: 'none',
+              touchAction: 'none',
+              userSelect: 'none',
+              WebkitUserSelect: 'none'
+            }}
+            onTouchStart={(e) => e.preventDefault()}
+            onTouchMove={(e) => e.preventDefault()}
+            onTouchEnd={(e) => e.preventDefault()}
+          ></div>
+          
+          {/* City Information Panel */}
+          <div className="px-6 mb-6">
+            <div className="bg-black/95 border border-white/10 rounded-2xl backdrop-blur-3xl shadow-2xl shadow-black/60 overflow-hidden"
+                 onTouchStart={(e) => e.stopPropagation()}
+                 onTouchMove={(e) => e.stopPropagation()}
+                 onTouchEnd={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="p-6 pb-4 border-b border-white/5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-white mb-2">
+                      {city.name}
+                    </h1>
+                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#FF8C00]/20 border border-[#FF8C00]/30">
+                      <span className="text-[#FF8C00] font-semibold text-sm">
+                        Run #{city.order_number}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right text-white/60 text-sm">
+                    <div>{city.order_number}/50</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="p-6 space-y-4">
+                <div className="flex items-center text-white/80">
+                  <svg className="w-5 h-5 mr-3 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>
+                    {new Date(city.run_date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+                
+                {city.distance_km && (
+                  <div className="flex items-center text-white/80">
+                    <svg className="w-5 h-5 mr-3 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>{city.distance_km} kilometers</span>
+                  </div>
+                )}
+
+                {city.description && (
+                  <div className="pt-4 border-t border-white/5">
+                    <p className="text-white/70 leading-relaxed">
+                      {city.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation */}
+              <div className="px-6 pb-6">
+                <div className="flex items-center justify-between">
+                  {prevCity ? (
+                    <button
+                      onClick={() => navigateToCity(prevCity)}
+                      data-nav="prev"
+                      className={clsx(
+                        'flex items-center px-4 py-2 rounded-lg border',
+                        'bg-white/5 border-white/10 text-white/80',
+                        'hover:bg-white/10 hover:border-white/20 hover:text-white',
+                        'transition-all duration-200 group'
+                      )}
+                    >
+                      <svg className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      <div className="text-left">
+                        <div className="text-xs text-white/50">Previous</div>
+                        <div className="font-medium">{prevCity.name}</div>
+                      </div>
+                    </button>
+                  ) : (
+                    <div></div>
+                  )}
+
+                  {nextCity ? (
+                    <button
+                      onClick={() => navigateToCity(nextCity)}
+                      data-nav="next"
+                      className={clsx(
+                        'flex items-center px-4 py-2 rounded-lg border',
+                        'bg-[#FF8C00]/10 border-[#FF8C00]/20 text-[#FF8C00]',
+                        'hover:bg-[#FF8C00]/20 hover:border-[#FF8C00]/30',
+                        'transition-all duration-200 group'
+                      )}
+                    >
+                      <div className="text-right mr-2">
+                        <div className="text-xs text-[#FF8C00]/70">Next</div>
+                        <div className="font-medium">{nextCity.name}</div>
+                      </div>
+                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <div className="text-white/40 text-sm italic">Final destination</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Story Section with Photo Gallery Preview */}
+          <div className="px-6 pb-8">
+            <div className="bg-black/95 border border-white/10 rounded-2xl backdrop-blur-3xl shadow-2xl shadow-black/60 overflow-hidden"
+                 onTouchStart={(e) => e.stopPropagation()}
+                 onTouchMove={(e) => e.stopPropagation()}
+                 onTouchEnd={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-white mb-4">My Experience in {city.name}</h3>
+                
+                {/* Photo Gallery Preview - Shows partial content to indicate more */}
+                <div className="mb-6 relative">
+                  <PhotoGallery photos={cityPhotos} cityName={city.name} />
+                  {/* Subtle indication that there's more content */}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white/20 rounded-full"></div>
+                </div>
+                
+                <p className="text-white/70 leading-relaxed text-lg mb-6">
+                  {storyContent || `Discover the story of my running journey through ${city.name}. Each step through this beautiful city was an adventure, exploring its unique character and discovering new perspectives along the way.`}
+                </p>
+                
+                {/* Additional Info */}
+                <div className="flex items-center gap-6 pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-2 text-white/80">
+                    <svg className="w-5 h-5 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="font-medium">Run #{city.order_number}</span>
+                  </div>
+                  {city.distance_km && (
+                    <div className="flex items-center gap-2 text-white/80">
+                      <svg className="w-5 h-5 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <span className="font-medium">{city.distance_km} km</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

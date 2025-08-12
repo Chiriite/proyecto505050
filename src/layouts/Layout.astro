@@ -49,4 +49,166 @@ const { title, description = "Interactive map of my running journey across Spain
     background: #FF8C00;
     color: #000000;
   }
+
+  /* Story Panel Styles */
+  .story-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.98) 100%
+    );
+    backdrop-filter: blur(20px);
+    border-radius: 24px 24px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.6);
+    z-index: 1100;
+    will-change: transform;
+  }
+
+  .drag-handle {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0 8px 0;
+    cursor: grab;
+    touch-action: pan-y;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+
+  .drag-indicator {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+
+  .story-content {
+    padding: 0 24px 24px 24px;
+    height: calc(100% - 40px);
+    overflow-y: auto;
+  }
+
+  /* Photo Gallery Styles */
+  .photo-gallery {
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .photo-gallery-empty {
+    margin-bottom: 32px;
+  }
+
+  .photo-container-wrapper {
+    overflow: hidden;
+    border-radius: 16px;
+  }
+
+  .photo-container {
+    display: flex;
+    will-change: transform;
+  }
+
+  .photo-slide {
+    flex: 0 0 100%;
+    position: relative;
+  }
+
+  .photo-image {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 16px;
+  }
+
+  .photo-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 20px 16px 12px 16px;
+    border-radius: 0 0 16px 16px;
+    font-size: 14px;
+  }
+
+  .photo-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .nav-dot.active {
+    background: #FF8C00;
+  }
+
+  .nav-dot:hover {
+    background: rgba(255, 140, 0, 0.7);
+  }
+
+  /* Story Text Styles */
+  .story-title {
+    color: #FF8C00;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+
+  .story-description {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .story-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 768px) {
+    .story-panel {
+      border-radius: 20px 20px 0 0;
+    }
+    
+    .photo-image {
+      height: 200px;
+    }
+    
+    .story-content {
+      padding: 0 20px 20px 20px;
+    }
+
+    .story-title {
+      font-size: 20px;
+    }
+  }
 </style>
