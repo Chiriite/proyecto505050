@@ -112,6 +112,30 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
         }
       });
 
+      // Centrar el mapa en el track completo con padding adaptativo
+      if (track.coordinates.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        
+        // Extender los bounds para incluir todos los puntos del track
+        track.coordinates.forEach(coord => {
+          bounds.extend(coord);
+        });
+        
+        const isMobile = window.innerWidth < 768; 
+        
+        // Padding adaptativo según dispositivo
+        const padding = isMobile 
+          ? { top: 100, bottom: 320, left: 50, right: 50 }
+          : { top: 50, bottom: 50, left: 320, right: 50 };
+        
+        // Ajustar el zoom y centrar para mostrar todo el track
+        map.current.fitBounds(bounds, {
+          padding,
+          duration: 1000,
+          essential: true
+        });
+      }
+
       console.log('GPX track added successfully:', track.name, 'Distance:', track.distance, 'km');
     } catch (error) {
       console.error('Error adding GPX track:', error);
