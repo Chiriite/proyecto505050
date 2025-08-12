@@ -1,16 +1,7 @@
 import React from 'react';
 import { clsx } from 'clsx';
+import { type City } from '../hooks/useMapState';
 
-export interface City {
-  id: number;
-  name: string;
-  order_number: number;
-  latitude: number;
-  longitude: number;
-  run_date: string;
-  distance_km?: number;
-  description?: string;
-}
 
 interface MapMarkerProps {
   city: City;
@@ -80,5 +71,3 @@ export default function MapMarker({ city, isSelected, onClick }: MapMarkerProps)
   );
 }
 
-// Export the City interface for use in other components
-export type { City };

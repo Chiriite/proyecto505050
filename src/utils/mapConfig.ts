@@ -184,11 +184,11 @@ export const setupResizeHandler = (map: maplibregl.Map): (() => void) => {
  * Spain map specific configuration
  */
 export const SPAIN_MAP_CONFIG = {
-  center: [-3.7038, 40.4168] as [number, number], // Madrid center
+  center: [-3.7038, 40.4168] as [number, number],
   zoom: 5.8
 };
 
 /**
  * City detail map specific zoom level
  */
-export const CITY_DETAIL_ZOOM = 12;
+export const CITY_DETAIL_ZOOM = 13;

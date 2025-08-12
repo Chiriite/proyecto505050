@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { clsx } from 'clsx';
-import type { City } from './MapMarker';
+import type { City } from '../hooks/useMapState';
 import { createMapOptions, handleMapError, setupResizeHandler, CITY_DETAIL_ZOOM } from '../utils/mapConfig';
+import { useGPXTrack } from '../hooks/useGPXTrack';
 
 interface CityDetailViewProps {
   city: City;
@@ -43,7 +44,6 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
       map.current.on('load', () => {
         if (map.current) {
           console.log('City detail map loaded successfully');
-          addCityMarker();
           setIsLoading(false);
         }
       });
@@ -65,31 +65,57 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
     }
   }, [city]);
 
-  const addCityMarker = () => {
-    if (!map.current) return;
+  // Cargar track GPX basado en el city ID
+  const { track, loading: trackLoading } = useGPXTrack(`/tracks/${city.id}.gpx`);
 
-    // Create a prominent marker for the current city
-    const markerContainer = document.createElement('div');
-    markerContainer.innerHTML = `
-      <div class="
-        relative flex items-center justify-center cursor-pointer select-none
-        w-14 h-14 rounded-full bg-gradient-to-br from-primary via-primary to-primary-dark
-        border-3 border-white shadow-2xl shadow-primary/40
-        text-black font-extrabold text-lg
-        animate-pulse
-      ">
-        <span class="relative z-10">${city.order_number}</span>
-        <div class="absolute inset-0 rounded-full bg-primary/30 blur-lg animate-ping"></div>
-      </div>
-    `;
+  // Add GPX track when track data becomes available
+  useEffect(() => {
+    if (map.current && track && !trackLoading) {
+      addGPXTrack();
+    }
+  }, [track, trackLoading, map.current]);
 
-    // Add marker to map
-    new maplibregl.Marker({
-      element: markerContainer,
-      anchor: 'center'
-    })
-      .setLngLat([city.longitude, city.latitude])
-      .addTo(map.current!);
+  const addGPXTrack = () => {
+    if (!map.current || !track) return;
+
+    try {
+      // Remove existing track if it exists
+      if (map.current.getLayer('gpx-track-line')) {
+        map.current.removeLayer('gpx-track-line');
+      }
+      if (map.current.getSource('gpx-track')) {
+        map.current.removeSource('gpx-track');
+      }
+
+      // Agregar fuente del track GPX
+      map.current.addSource('gpx-track', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: track.coordinates
+          }
+        }
+      });
+
+      // Agregar capa del track
+      map.current.addLayer({
+        id: 'gpx-track-line',
+        type: 'line',
+        source: 'gpx-track',
+        paint: {
+          'line-color': '#f97316',
+          'line-width': 3,
+          'line-opacity': 0.8
+        }
+      });
+
+      console.log('GPX track added successfully:', track.name, 'Distance:', track.distance, 'km');
+    } catch (error) {
+      console.error('Error adding GPX track:', error);
+    }
   };
 
   const navigateToCity = (targetCity: City) => {

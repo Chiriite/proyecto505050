@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { clsx } from 'clsx';
-import MapMarker, { type City } from './MapMarker';
-import { mockCities } from '../hooks/useMapState';
+import { type City, citiesArray } from '../hooks/useMapState';
 import { createMapOptions, handleMapError, setupResizeHandler, SPAIN_MAP_CONFIG } from '../utils/mapConfig';
 
 interface SpainMapProps {
@@ -17,7 +16,7 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
 
   // Initialize cities (replace with Supabase fetch)
   useEffect(() => {
-    setCities(mockCities);
+    setCities(citiesArray);
   }, []);
 
   // Initialize map
