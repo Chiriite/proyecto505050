@@ -64,6 +64,7 @@ The application will fetch data from **Supabase** containing:
 
 When adding new features:
 - Configure React integration in `astro.config.mjs` if not already done
+- Use tailwind
 - Set up Supabase client configuration
 - Integrate MapLibre for map functionality
 - Maintain dark theme color scheme (black/white/orange #FF8C00)

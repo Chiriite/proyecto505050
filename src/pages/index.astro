@@ -46,12 +46,12 @@ import SpainMap from '../components/SpainMap.tsx';
     </header>
 
     <!-- Interactive Map -->
-    <section class="absolute inset-0 z-[1]">
+    <section class="absolute inset-0 z-[1] w-full h-full">
       <SpainMap client:load />
     </section>
 
     <!-- Loading State -->
-    <div class="fixed inset-0 bg-background flex items-center justify-center z-[2000] transition-opacity duration-500" id="loading">
+    <div class="fixed inset-0 bg-background flex items-center justify-center z-[2000] transition-opacity duration-500 opacity-100 pointer-events-auto" id="loading">
       <div class="text-center">
         <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
         <p class="text-text-primary">Loading your running journey...</p>
@@ -99,10 +99,28 @@ import SpainMap from '../components/SpainMap.tsx';
 
 <script>
   // Handle loading state - fade out after content loads
-  window.addEventListener('load', () => {
+  function hideLoadingScreen() {
     const loading = document.getElementById('loading');
-    setTimeout(() => {
-      loading?.classList.add('opacity-0', 'pointer-events-none');
-    }, 800);
+    if (loading) {
+      loading.style.opacity = '0';
+      loading.style.pointerEvents = 'none';
+      setTimeout(() => {
+        loading.style.display = 'none';
+      }, 500);
+    }
+  }
+
+  // Try multiple approaches to ensure loading screen is hidden
+  document.addEventListener('DOMContentLoaded', () => {
+    // Hide after a reasonable delay
+    setTimeout(hideLoadingScreen, 1000);
   });
+
+  window.addEventListener('load', () => {
+    // Also hide on window load
+    setTimeout(hideLoadingScreen, 500);
+  });
+
+  // Fallback - force hide after 3 seconds
+  setTimeout(hideLoadingScreen, 3000);
 </script>
