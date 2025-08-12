@@ -3,6 +3,7 @@ import maplibregl from 'maplibre-gl';
 import { clsx } from 'clsx';
 import MapMarker, { type City } from './MapMarker';
 import { mockCities } from '../hooks/useMapState';
+import { createMapOptions, handleMapError, setupResizeHandler, SPAIN_MAP_CONFIG } from '../utils/mapConfig';
 
 interface SpainMapProps {
   onCitySelect?: (city: City) => void;
@@ -27,106 +28,17 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
       console.log('Initializing map...');
       console.log('Cities available:', cities.length);
       
-      map.current = new maplibregl.Map({
-        container: mapContainer.current,
-        style: {
-          version: 8,
-          sources: {
-            'dark-tiles': {
-              type: 'raster',
-              tiles: [
-                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-              ],
-              tileSize: 256,
-              attribution: '© OpenStreetMap contributors, © CartoDB',
-              maxzoom: 19
-            },
-            'fallback-dark': {
-              type: 'raster',
-              tiles: [
-                'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png'
-              ],
-              tileSize: 256,
-              attribution: '© Stadia Maps, © OpenMapTiles © OpenStreetMap contributors',
-              maxzoom: 20
-            }
-          },
-          layers: [
-            {
-              id: 'dark-background',
-              type: 'background',
-              paint: {
-                'background-color': '#0a0a0a'
-              }
-            },
-            {
-              id: 'dark-tiles',
-              type: 'raster',
-              source: 'dark-tiles',
-              minzoom: 0,
-              maxzoom: 19,
-              paint: {
-                'raster-opacity': 0.9,
-                'raster-brightness-min': 0.15,
-                'raster-brightness-max': 0.5,
-                'raster-contrast': 0.4,
-                'raster-saturation': -0.6
-              }
-            }
-          ],
-          glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
-        },
-        center: [-3.7038, 40.4168], // Madrid center
-        zoom: 5.8,
-        pitch: 0,
-        bearing: 0,
-        attributionControl: false,
-        renderWorldCopies: false,
-        maxTileCacheSize: 50
-      });
+      const mapOptions = createMapOptions(
+        mapContainer.current,
+        SPAIN_MAP_CONFIG.center,
+        SPAIN_MAP_CONFIG.zoom
+      );
+      
+      map.current = new maplibregl.Map(mapOptions as maplibregl.MapOptions);
 
       // Enhanced error handling with fallback
       map.current.on('error', (e) => {
-        console.error('Map error:', e);
-        
-        // Try fallback dark tiles if primary fails
-        if (e.error && e.error.message && e.error.message.includes('dark-tiles')) {
-          console.log('Switching to fallback dark tiles...');
-          
-          try {
-            // Remove failed source and add fallback
-            if (map.current?.getSource('dark-tiles')) {
-              map.current.removeLayer('dark-tiles');
-              map.current.removeSource('dark-tiles');
-            }
-            
-            // Add fallback layer
-            map.current?.addLayer({
-              id: 'fallback-dark-layer',
-              type: 'raster',
-              source: 'fallback-dark',
-              minzoom: 0,
-              maxzoom: 20,
-              paint: {
-                'raster-opacity': 0.9,
-                'raster-brightness-min': 0.1,
-                'raster-brightness-max': 0.4,
-                'raster-contrast': 0.3,
-                'raster-saturation': -0.5
-              }
-            });
-            
-            console.log('Fallback tiles loaded successfully');
-          } catch (fallbackError) {
-            console.error('Fallback tiles also failed:', fallbackError);
-            setMapError('Failed to load map tiles. Please check your internet connection.');
-          }
-        } else {
-          setMapError('Failed to load map tiles');
-        }
+        handleMapError(e, map.current, setMapError);
       });
 
       // Simple map load handler
@@ -139,17 +51,11 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
         }
       });
 
-      // Add resize handler
-      const handleResize = () => {
-        if (map.current) {
-          map.current.resize();
-        }
-      };
-      
-      window.addEventListener('resize', handleResize);
+      // Setup resize handler
+      const cleanupResize = setupResizeHandler(map.current);
 
       return () => {
-        window.removeEventListener('resize', handleResize);
+        cleanupResize();
         if (map.current) {
           map.current.remove();
           map.current = null;
@@ -234,8 +140,8 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
 
   const resetView = () => {
     map.current?.flyTo({
-      center: [-3.7038, 40.4168],
-      zoom: 5.8,
+      center: SPAIN_MAP_CONFIG.center,
+      zoom: SPAIN_MAP_CONFIG.zoom,
       duration: 1000
     });
   };

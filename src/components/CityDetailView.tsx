@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { clsx } from 'clsx';
 import type { City } from './MapMarker';
+import { createMapOptions, handleMapError, setupResizeHandler, CITY_DETAIL_ZOOM } from '../utils/mapConfig';
 
 interface CityDetailViewProps {
   city: City;
@@ -17,114 +18,25 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
 
   // Initialize map focused on the city
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || map.current || !city) return;
 
     try {
       console.log('Initializing city detail map for:', city.name);
       
-      map.current = new maplibregl.Map({
-        container: mapContainer.current,
-        style: {
-          version: 8,
-          sources: {
-            'dark-tiles': {
-              type: 'raster',
-              tiles: [
-                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-              ],
-              tileSize: 256,
-              attribution: '© OpenStreetMap contributors, © CartoDB',
-              maxzoom: 19
-            },
-            'fallback-dark': {
-              type: 'raster',
-              tiles: [
-                'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png'
-              ],
-              tileSize: 256,
-              attribution: '© Stadia Maps, © OpenMapTiles © OpenStreetMap contributors',
-              maxzoom: 20
-            }
-          },
-          layers: [
-            {
-              id: 'dark-background',
-              type: 'background',
-              paint: {
-                'background-color': '#0a0a0a'
-              }
-            },
-            {
-              id: 'dark-tiles',
-              type: 'raster',
-              source: 'dark-tiles',
-              minzoom: 0,
-              maxzoom: 19,
-              paint: {
-                'raster-opacity': 0.9,
-                'raster-brightness-min': 0.1,
-                'raster-brightness-max': 0.5,
-                'raster-contrast': 0.4,
-                'raster-saturation': -0.4
-              }
-            }
-          ],
-          glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
-        },
-        center: [city.longitude, city.latitude],
-        zoom: 12,
-        pitch: 0,
-        bearing: 0,
-        antialias: true,
-        attributionControl: false,
-        renderWorldCopies: false,
-        maxTileCacheSize: 50
-      });
+      const mapOptions = createMapOptions(
+        mapContainer.current,
+        [city.longitude, city.latitude],
+        CITY_DETAIL_ZOOM
+      );
+      
+      map.current = new maplibregl.Map(mapOptions as maplibregl.MapOptions);
 
       // Enhanced error handling with fallback
       map.current.on('error', (e) => {
-        console.error('City detail map error:', e);
-        
-        // Try fallback dark tiles if primary fails
-        if (e.error && e.error.message && e.error.message.includes('dark-tiles')) {
-          console.log('Switching city detail map to fallback tiles...');
-          
-          try {
-            // Remove failed source and add fallback
-            if (map.current?.getSource('dark-tiles')) {
-              map.current.removeLayer('dark-tiles');
-              map.current.removeSource('dark-tiles');
-            }
-            
-            // Add fallback layer
-            map.current?.addLayer({
-              id: 'fallback-dark-layer',
-              type: 'raster',
-              source: 'fallback-dark',
-              minzoom: 0,
-              maxzoom: 20,
-              paint: {
-                'raster-opacity': 0.9,
-                'raster-brightness-min': 0.1,
-                'raster-brightness-max': 0.5,
-                'raster-contrast': 0.4,
-                'raster-saturation': -0.4
-              }
-            });
-            
-            console.log('City detail fallback tiles loaded');
-          } catch (fallbackError) {
-            console.error('City detail fallback failed:', fallbackError);
-            setMapError('Failed to load map tiles');
-            setIsLoading(false);
-          }
-        } else {
-          setMapError('Failed to load map tiles');
+        handleMapError(e, map.current, (message) => {
+          setMapError(message);
           setIsLoading(false);
-        }
+        });
       });
 
       // Map load handler
@@ -136,17 +48,11 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
         }
       });
 
-      // Add resize handler
-      const handleResize = () => {
-        if (map.current) {
-          map.current.resize();
-        }
-      };
-      
-      window.addEventListener('resize', handleResize);
+      // Setup resize handler
+      const cleanupResize = setupResizeHandler(map.current);
 
       return () => {
-        window.removeEventListener('resize', handleResize);
+        cleanupResize();
         if (map.current) {
           map.current.remove();
           map.current = null;
