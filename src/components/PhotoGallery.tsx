@@ -33,7 +33,7 @@ export default function PhotoGallery({ photos, cityName }: PhotoGalleryProps) {
       {/* Photo Container */}
       <div className="photo-container-wrapper">
         <div 
-          className="photo-container"
+          className="photo-container flex flex-col gap-6"
           style={{ 
             transform: `translateX(-${currentIndex * 100}%)`,
             transition: 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
@@ -44,14 +44,9 @@ export default function PhotoGallery({ photos, cityName }: PhotoGalleryProps) {
               <img 
                 src={photo.photo_url} 
                 alt={photo.caption || `${cityName} photo ${index + 1}`}
-                className="photo-image"
+                className="photo-image rounded-lg max-h-80 w-full object-cover"
                 loading="lazy"
               />
-              {photo.caption && (
-                <div className="photo-caption">
-                  {photo.caption}
-                </div>
-              )}
             </div>
           ))}
         </div>

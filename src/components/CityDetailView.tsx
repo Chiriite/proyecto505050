@@ -5,6 +5,8 @@ import type { City } from '../hooks/useMapState';
 import { createMapOptions, handleMapError, setupResizeHandler, CITY_DETAIL_ZOOM } from '../utils/mapConfig';
 import { useGPXTrack } from '../hooks/useGPXTrack';
 import PhotoGallery from './PhotoGallery';
+import StatItem from './StatItem';
+import { TimeIcon, PaceIcon, ElevationIcon, HumidityIcon } from './StatIcons';
 
 interface CityDetailViewProps {
   city: City;
@@ -80,13 +82,26 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
   useEffect(() => {
     const loadLocalPhotos = () => {
       const cityId = city.id.toString();
-      const availableImages = ['1', '2', '3'];
       
-      const localPhotos: CityPhoto[] = availableImages.map((imageNum) => ({
-        id: imageNum,
-        photo_url: `/images/${cityId}/${imageNum}.webp`,
-        caption: `Imagen ${imageNum} de ${city.name}`
-      }));
+      // Solo incluir las fotos que sabemos que existen
+      // Puedes ajustar esto según qué fotos estén disponibles para cada ciudad
+      const localPhotos: CityPhoto[] = [];
+      
+      // Agregar fotos solo si están disponibles
+      if (cityId === '49' || cityId === '50') {
+        // Estas ciudades tienen 3 fotos
+        localPhotos.push(
+          { id: '1', photo_url: `/images/${cityId}/1.webp`, caption: `Imagen 1 de ${city.name}` },
+          { id: '2', photo_url: `/images/${cityId}/2.webp`, caption: `Imagen 2 de ${city.name}` },
+          { id: '3', photo_url: `/images/${cityId}/3.webp`, caption: `Imagen 3 de ${city.name}` }
+        );
+      } else {
+        // Otras ciudades pueden tener menos fotos
+        localPhotos.push(
+          { id: '1', photo_url: `/images/${cityId}/1.webp`, caption: `Imagen 1 de ${city.name}` },
+          { id: '2', photo_url: `/images/${cityId}/2.webp`, caption: `Imagen 2 de ${city.name}` }
+        );
+      }
       
       setCityPhotos(localPhotos);
     };
@@ -243,9 +258,8 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
            style={{ touchAction: 'pan-y' }}
       >
         <div className="bg-gradient-to-t from-black via-black/98 to-transparent md:bg-gradient-to-r md:from-black md:via-black/98 md:to-transparent">
-          {/* Spacer for initial positioning - shows map content */}
           <div 
-            className="h-[45vh]" 
+            className="h-[42vh]" 
             style={{ 
               pointerEvents: 'none',
               touchAction: 'none',
@@ -264,60 +278,65 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                  onTouchMove={(e) => e.stopPropagation()}
                  onTouchEnd={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="p-6 pb-4 border-b border-white/5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">
-                      {city.name}
-                    </h1>
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#FF8C00]/20 border border-[#FF8C00]/30">
-                      <span className="text-[#FF8C00] font-semibold text-sm">
-                        Run #{city.order_number}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right text-white/60 text-sm">
-                    <div>{city.order_number}/50</div>
+              <div className="flex flex-col items-center p-6 border-b border-white/10">
+                <div className="w-12 h-1 bg-white/10 mb-4 rounded-full"></div>
+
+                <div className="flex w-full items-center justify-between">
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    {city.name}
+                  </h1>
+                  <div className="inline-flex items-center px-3 py-1 rounded-lg bg-[#FF8C00]/20 border border-[#FF8C00]/30">
+                    <p><span className="font-bold text-[#FF8C00]">{city.order_number}</span> / 50</p>
                   </div>
                 </div>
-              </div>
 
-              {/* Details */}
-              <div className="p-6 space-y-4">
-                <div className="flex items-center text-white/80">
-                  <svg className="w-5 h-5 mr-3 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z" />
-                  </svg>
+                <div className="flex items-start w-full text-white/50">                  
                   <span>
-                    {new Date(city.run_date).toLocaleDateString('en-US', {
+                    {new Date(city.run_date).toLocaleDateString('es-ES', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'
                     })}
                   </span>
                 </div>
-                
-                {city.distance_km && (
-                  <div className="flex items-center text-white/80">
-                    <svg className="w-5 h-5 mr-3 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span>{city.distance_km} kilometers</span>
-                  </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 w-full py-4">
+                {city.time && (
+                  <StatItem
+                    icon={<TimeIcon />}
+                    label="Tiempo"
+                    value={city.time}
+                  />
                 )}
 
-                {city.description && (
-                  <div className="pt-4 border-t border-white/5">
-                    <p className="text-white/70 leading-relaxed">
-                      {city.description}
-                    </p>
-                  </div>
+                {city.pace && (
+                  <StatItem
+                    icon={<PaceIcon />}
+                    label="Ritmo"
+                    value={`${city.pace} /km`}
+                  />
+                )}
+
+                {typeof city.elevation !== 'undefined' && (
+                  <StatItem
+                    icon={<ElevationIcon />}
+                    label="Desnivel"
+                    value={`${city.elevation}m`}
+                  />
+                )}
+
+                {typeof city.humidity !== 'undefined' && (
+                  <StatItem
+                    icon={<HumidityIcon />}
+                    label="Humedad"
+                    value={`${city.humidity}%`}
+                  />
                 )}
               </div>
 
               {/* Navigation */}
-              <div className="px-6 pb-6">
+              <div className="px-6 pb-6 mt-2">
                 <div className="flex items-center justify-between">
                   {prevCity ? (
                     <button
@@ -334,7 +353,6 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
                       <div className="text-left">
-                        <div className="text-xs text-white/50">Previous</div>
                         <div className="font-medium">{prevCity.name}</div>
                       </div>
                     </button>
@@ -354,7 +372,6 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                       )}
                     >
                       <div className="text-right mr-2">
-                        <div className="text-xs text-[#FF8C00]/70">Next</div>
                         <div className="font-medium">{nextCity.name}</div>
                       </div>
                       <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,7 +379,7 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                       </svg>
                     </button>
                   ) : (
-                    <div className="text-white/40 text-sm italic">Final destination</div>
+                    <div className="text-white/40 text-sm italic">Final</div>
                   )}
                 </div>
               </div>
@@ -377,36 +394,13 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                  onTouchEnd={(e) => e.stopPropagation()}
             >
               <div className="p-6">
-                <h3 className="text-2xl font-bold text-white mb-4">My Experience in {city.name}</h3>
+                <h3 className="text-xl font-medium text-center text-white mb-4">Fotos en {city.name}</h3>
                 
-                {/* Photo Gallery Preview - Shows partial content to indicate more */}
-                <div className="mb-6 relative">
-                  <PhotoGallery photos={cityPhotos} cityName={city.name} />
-                  {/* Subtle indication that there's more content */}
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white/20 rounded-full"></div>
-                </div>
+                <PhotoGallery photos={cityPhotos} cityName={city.name} /> 
                 
-                <p className="text-white/70 leading-relaxed text-lg mb-6">
-                  {storyContent || `Discover the story of my running journey through ${city.name}. Each step through this beautiful city was an adventure, exploring its unique character and discovering new perspectives along the way.`}
+                <p className="text-white/70 leading-relaxed text-md text-center">
+                  Contenido de Strava <a href="https://www.strava.com/athletes/41291884" target="_blank" rel="noopener noreferrer" className="text-[#FF8C00] hover:underline">@pitufollow</a>.
                 </p>
-                
-                {/* Additional Info */}
-                <div className="flex items-center gap-6 pt-4 border-t border-white/10">
-                  <div className="flex items-center gap-2 text-white/80">
-                    <svg className="w-5 h-5 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="font-medium">Run #{city.order_number}</span>
-                  </div>
-                  {city.distance_km && (
-                    <div className="flex items-center gap-2 text-white/80">
-                      <svg className="w-5 h-5 text-[#FF8C00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <span className="font-medium">{city.distance_km} km</span>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           </div>
