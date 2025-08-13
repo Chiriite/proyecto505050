@@ -27,6 +27,37 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
   const [isLoading, setIsLoading] = useState(true);
   const [cityPhotos, setCityPhotos] = useState<CityPhoto[]>([]);
   const [storyContent, setStoryContent] = useState<string>('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenIndex, setFullscreenIndex] = useState(0);
+
+  // Handle keyboard events for fullscreen mode
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!isFullscreen) return;
+      
+      if (e.key === 'Escape') {
+        setIsFullscreen(false);
+      } else if (e.key === 'ArrowLeft') {
+        setFullscreenIndex((prev) => (prev - 1 + cityPhotos.length) % cityPhotos.length);
+      } else if (e.key === 'ArrowRight') {
+        setFullscreenIndex((prev) => (prev + 1) % cityPhotos.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isFullscreen, cityPhotos.length]);
+
+  // Handle opening fullscreen
+  const openFullscreen = (index: number) => {
+    setFullscreenIndex(index);
+    setIsFullscreen(true);
+  };
+
+  // Handle closing fullscreen
+  const closeFullscreen = () => {
+    setIsFullscreen(false);
+  };
 
   // Initialize map focused on the city
   useEffect(() => {
@@ -177,8 +208,8 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
         
         // Padding adaptativo según dispositivo
         const padding = isMobile 
-          ? { top: 100, bottom: 320, left: 50, right: 50 }
-          : { top: 50, bottom: 50, left: 320, right: 50 };
+          ? { top: 100, bottom: 400, left: 50, right: 50 }
+          : { top: 50, bottom: 50, left: 400, right: 50 };
         
         // Ajustar el zoom y centrar para mostrar todo el track
         map.current.fitBounds(bounds, {
@@ -408,7 +439,11 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                   <h3 className="text-lg text-white">Fotos en <span className="text-[#FF8C00] font-bold">{city.name}</span></h3>
                 </div>
                 
-                <PhotoGallery photos={cityPhotos} cityName={city.name} /> 
+                <PhotoGallery 
+                  photos={cityPhotos} 
+                  cityName={city.name}
+                  onImageClick={openFullscreen}
+                /> 
                 
                 <p className="text-white/70 leading-relaxed text-md md:text-xs text-center mt-4">
                   Contenido de Strava <a href="https://www.strava.com/athletes/41291884" target="_blank" rel="noopener noreferrer" className="text-[#FF8C00] hover:underline">@pitufollow</a>
@@ -418,6 +453,75 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
           </div>
         </div>
       </div>
+
+      {/* Global Fullscreen Modal - Highest z-index to cover everything */}
+      {isFullscreen && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-lg"
+          onClick={closeFullscreen}
+        >
+          {/* Close Button */}
+          <button
+            className="absolute top-6 right-6 z-[10000] text-white/70 hover:text-white text-3xl md:text-4xl p-3 bg-black/50 rounded-full backdrop-blur-sm transition-all hover:bg-black/70"
+            onClick={closeFullscreen}
+            aria-label="Close fullscreen"
+          >
+            ✕
+          </button>
+
+          {/* Navigation Arrows */}
+          {cityPhotos.length > 1 && (
+            <>
+              <button
+                className="absolute left-4 z-[10000] text-white/70 hover:text-white text-4xl md:text-5xl p-3 bg-black/50 rounded-full backdrop-blur-sm transition-all hover:bg-black/70 flex items-center justify-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFullscreenIndex((prev) => (prev - 1 + cityPhotos.length) % cityPhotos.length);
+                }}
+                aria-label="Previous image"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                className="absolute right-4 z-[10000] text-white/70 hover:text-white text-4xl md:text-5xl p-3 bg-black/50 rounded-full backdrop-blur-sm transition-all hover:bg-black/70 flex items-center justify-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFullscreenIndex((prev) => (prev + 1) % cityPhotos.length);
+                }}
+                aria-label="Next image"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Fullscreen Image Container */}
+          <div className="max-w-[95vw] max-h-[95vh] p-6" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={cityPhotos[fullscreenIndex]?.photo_url}
+              alt={cityPhotos[fullscreenIndex]?.caption || `${city.name} photo ${fullscreenIndex + 1}`}
+              className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+              style={{ maxHeight: 'calc(100vh - 8rem)' }}
+            />
+          </div>
+
+          {/* Image Counter & City Info */}
+          <div className="absolute bottom-16 md:bottom-8 left-1/2 transform -translate-x-1/2 text-center flex flex-col md:flex-row justify-center md:gap-2 items-center">
+            {cityPhotos.length > 1 && (
+              <div className="text-white/80 text-lg md:text-sm font-medium">
+                {fullscreenIndex + 1} / {cityPhotos.length}
+              </div>
+            )}
+            <div className="text-[#FF8C00] text-sm font-medium">
+              {city.name}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

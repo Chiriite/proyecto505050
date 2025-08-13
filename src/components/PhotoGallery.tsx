@@ -9,10 +9,18 @@ interface CityPhoto {
 interface PhotoGalleryProps {
   photos: CityPhoto[];
   cityName: string;
+  onImageClick?: (index: number) => void;
 }
 
-export default function PhotoGallery({ photos, cityName }: PhotoGalleryProps) {
+export default function PhotoGallery({ photos, cityName, onImageClick }: PhotoGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Handle image click
+  const handleImageClick = (index: number) => {
+    if (onImageClick) {
+      onImageClick(index);
+    }
+  };
 
   if (!photos.length) {
     return (
@@ -44,8 +52,9 @@ export default function PhotoGallery({ photos, cityName }: PhotoGalleryProps) {
               <img 
                 src={photo.photo_url} 
                 alt={photo.caption || `${cityName} photo ${index + 1}`}
-                className="photo-image rounded-lg max-h-80 md:max-h-[12vh] w-full object-cover"
+                className="photo-image rounded-lg max-h-80 md:max-h-[12vh] w-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                 loading="lazy"
+                onClick={() => handleImageClick(index)}
               />
             </div>
           ))}
