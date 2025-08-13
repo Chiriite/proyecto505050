@@ -261,12 +261,12 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
       </div>
 
       {/* Unified Scrollable Content Panel */}
-      <div className="absolute inset-x-0 md:inset-x-auto md:left-0 md:w-96 bottom-0 max-h-[85vh] overflow-y-auto z-[1500] overscroll-behavior-contain"
+      <div className="absolute inset-x-0 md:inset-x-auto md:left-0 md:w-[40vw] bottom-0 max-h-[85vh] overflow-y-auto z-[1500] overscroll-behavior-contain"
            style={{ touchAction: 'pan-y' }}
       >
         <div className="bg-gradient-to-t from-black via-black/98 to-transparent md:bg-gradient-to-r md:from-black md:via-black/98 md:to-transparent">
           <div 
-            className="h-[42vh]" 
+            className="h-[42vh] block md:hidden" 
             style={{ 
               pointerEvents: 'none',
               touchAction: 'none',
@@ -279,7 +279,7 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
           ></div>
           
           {/* City Information Panel */}
-          <div className="px-6 mb-6">
+          <div className="px-6 mb-4">
             <div className="bg-black/95 border border-white/10 rounded-2xl backdrop-blur-3xl shadow-2xl shadow-black/60 overflow-hidden"
                  onTouchStart={(e) => e.stopPropagation()}
                  onTouchMove={(e) => e.stopPropagation()}
@@ -400,7 +400,7 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                  onTouchMove={(e) => e.stopPropagation()}
                  onTouchEnd={(e) => e.stopPropagation()}
             >
-              <div className="p-6">
+              <div className="px-6 py-4">
                 <div className="flex items-center justify-center mb-4">
                   <svg className="w-5 h-5 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -410,8 +410,8 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                 
                 <PhotoGallery photos={cityPhotos} cityName={city.name} /> 
                 
-                <p className="text-white/70 leading-relaxed text-md text-center">
-                  Contenido de Strava <a href="https://www.strava.com/athletes/41291884" target="_blank" rel="noopener noreferrer" className="text-[#FF8C00] hover:underline">@pitufollow</a>.
+                <p className="text-white/70 leading-relaxed text-md md:text-xs text-center mt-4">
+                  Contenido de Strava <a href="https://www.strava.com/athletes/41291884" target="_blank" rel="noopener noreferrer" className="text-[#FF8C00] hover:underline">@pitufollow</a>
                 </p>
               </div>
             </div>

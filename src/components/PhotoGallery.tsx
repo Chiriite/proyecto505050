@@ -33,7 +33,7 @@ export default function PhotoGallery({ photos, cityName }: PhotoGalleryProps) {
       {/* Photo Container */}
       <div className="photo-container-wrapper">
         <div 
-          className="photo-container flex flex-col gap-6"
+          className="photo-container grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-2"
           style={{ 
             transform: `translateX(-${currentIndex * 100}%)`,
             transition: 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
@@ -44,27 +44,13 @@ export default function PhotoGallery({ photos, cityName }: PhotoGalleryProps) {
               <img 
                 src={photo.photo_url} 
                 alt={photo.caption || `${cityName} photo ${index + 1}`}
-                className="photo-image rounded-lg max-h-80 w-full object-cover"
+                className="photo-image rounded-lg max-h-80 md:max-h-[12vh] w-full object-cover"
                 loading="lazy"
               />
             </div>
           ))}
         </div>
       </div>
-
-      {/* Navigation Dots */}
-      {photos.length > 1 && (
-        <div className="photo-navigation">
-          {photos.map((_, index) => (
-            <button
-              key={index}
-              className={`nav-dot ${index === currentIndex ? 'active' : ''}`}
-              onClick={() => setCurrentIndex(index)}
-              aria-label={`View photo ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
