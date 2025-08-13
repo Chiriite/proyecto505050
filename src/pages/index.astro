@@ -1,46 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import SpainMap from '../components/SpainMap.tsx';
+import Button from '../components/Button.astro';
 ---
 
 <Layout title="Proyecto 505050">
   <main class="relative w-full h-screen overflow-hidden">
-    <!--
-      <header class="absolute inset-x-0 top-0 z-[1000] pointer-events-none">
-        <div class="max-w-lg m-8 p-8 bg-black/85 backdrop-blur-xl border border-primary rounded-2xl pointer-events-auto shadow-glow">
-          <h1 class="mb-4 leading-tight">
-            <span class="block text-hero-primary text-primary drop-shadow-md">My Running Journey</span>
-            <span class="block text-hero-secondary text-text-primary mt-1">Through Spain</span>
-          </h1>
-          
-          <p class="text-lg leading-relaxed mb-6 text-text-secondary">
-            Discover the <strong class="text-primary font-semibold">50 cities</strong> where I've run, 
-            mapped chronologically across the beautiful landscape of Spain
-          </p>
-          
-          <div class="flex items-center justify-between my-6 py-4 border-t border-b border-border">
-            <div class="text-center flex-1">
-              <span class="block text-stat-number text-primary">50</span>
-              <span class="block text-stat-label text-text-muted uppercase tracking-wider mt-1">Cities</span>
-            </div>
-            <div class="w-px h-12 bg-border mx-4"></div>
-            <div class="text-center flex-1">
-              <span class="block text-stat-number text-primary">500+</span>
-              <span class="block text-stat-label text-text-muted uppercase tracking-wider mt-1">Kilometers</span>
-            </div>
-            <div class="w-px h-12 bg-border mx-4"></div>
-            <div class="text-center flex-1">
-              <span class="block text-stat-number text-primary">2023</span>
-              <span class="block text-stat-label text-text-muted uppercase tracking-wider mt-1">Journey</span>
-            </div>
-          </div>
-          
-          <p class="text-sm text-text-muted italic">
-            Click on any numbered point to explore that city's running story
-          </p>
-        </div>
-      </header>
-    -->
+
+    <!-- Navigation Buttons -->
+    <div class="absolute bottom-8 right-8 z-[1000] flex flex-col gap-3">
+      <Button href="/c/1" text="Start Journey" variant="orange" />
+      <Button href="/estadisticas" text="Stats" variant="gray" />
+      <Button href="/info" text="Info" variant="blue" />
+      <Button href="https://www.migranodearena.org/reto/proyecto-50-50-50-50-d-as-50-kil-metros-50-provincias-espa-olas" isBlank text="Dona" variant="blue" />
+    </div>
 
     <!-- Interactive Map -->
     <section class="absolute inset-0 z-[1] w-full h-full">
@@ -50,8 +23,8 @@ import SpainMap from '../components/SpainMap.tsx';
     <!-- Loading State -->
     <div class="fixed inset-0 bg-background flex items-center justify-center z-[2000] transition-opacity duration-500 opacity-100 pointer-events-auto" id="loading">
       <div class="text-center">
-        <div class="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
-        <p class="text-text-primary">Loading your running journey...</p>
+        <div class="w-12 h-12 border-3 border-border border-primary rounded-full animate-spin mx-auto mb-12"></div>
+        <p class="text-text-primary flex flex-col items-center justify-center gap-2">Proyecto 50-50-50</p>
       </div>
     </div>
   </main>
@@ -63,6 +36,24 @@ import SpainMap from '../components/SpainMap.tsx';
         max-width: none;
         margin: 1rem;
         padding: 1.5rem;
+      }
+      
+      /* Mobile button adjustments */
+      .absolute.bottom-8.right-8 {
+        bottom: 1rem;
+        right: 1rem;
+      }
+      
+      .absolute.bottom-8.right-8 .flex.flex-col {
+        gap: 0.75rem;
+      }
+      
+      .absolute.bottom-8.right-8 .rounded-2xl {
+        padding: 0.75rem 1.25rem;
+      }
+      
+      .absolute.bottom-8.right-8 .text-lg {
+        font-size: 1rem;
       }
     }
 
@@ -79,6 +70,21 @@ import SpainMap from '../components/SpainMap.tsx';
       .h-12 {
         height: 1px;
       }
+      
+      /* Extra small screen button adjustments */
+      .absolute.bottom-8.right-8 {
+        bottom: 0.75rem;
+        right: 0.75rem;
+      }
+      
+      .absolute.bottom-8.right-8 .rounded-2xl {
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+      }
+      
+      .absolute.bottom-8.right-8 .text-lg {
+        font-size: 0.875rem;
+      }
     }
 
     /* Small height adjustments */
@@ -89,6 +95,16 @@ import SpainMap from '../components/SpainMap.tsx';
       .max-w-lg {
         margin: 0.5rem;
         padding: 1rem;
+      }
+      
+      /* Compact button layout for small screens */
+      .absolute.bottom-8.right-8 {
+        bottom: 0.5rem;
+        right: 0.5rem;
+      }
+      
+      .absolute.bottom-8.right-8 .flex.flex-col {
+        gap: 0.5rem;
       }
     }
   </style>

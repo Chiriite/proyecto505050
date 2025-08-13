@@ -31,7 +31,7 @@ export interface MapStyleConfig {
 
 export interface MapOptions {
   container: HTMLElement;
-  style: MapStyleConfig;
+  style: string | MapStyleConfig; // Support both style URL and custom config
   center: [number, number];
   zoom: number;
   pitch: number;
@@ -42,9 +42,24 @@ export interface MapOptions {
 }
 
 /**
- * Shared map style configuration for both overview and detail maps
+ * MapTiler configuration
  */
-export const createMapStyle = (): MapStyleConfig => ({
+export const MAPTILER_CONFIG = {
+  styleUrl: 'https://api.maptiler.com/maps/0198a408-3d96-785a-9355-2fab1729ecd0/style.json?key=PKcheI2Ze8DCtQWsmDGF',
+  attribution: '© MapTiler © OpenStreetMap contributors'
+};
+
+/**
+ * Primary MapTiler dark style - vector-based with excellent visual quality
+ */
+export const createMapTilerStyle = (): string => {
+  return MAPTILER_CONFIG.styleUrl;
+};
+
+/**
+ * Fallback raster-based map style configuration for reliability
+ */
+export const createFallbackMapStyle = (): MapStyleConfig => ({
   version: 8,
   sources: {
     'dark-tiles': {
@@ -96,28 +111,39 @@ export const createMapStyle = (): MapStyleConfig => ({
 });
 
 /**
+ * Create map style with MapTiler as primary and fallback support
+ */
+export const createMapStyle = (useFallback = false): string | MapStyleConfig => {
+  return useFallback ? createFallbackMapStyle() : createMapTilerStyle();
+};
+
+/**
  * Create base map options with shared configuration
  */
 export const createMapOptions = (
   container: HTMLElement,
   center: [number, number],
   zoom: number,
-  customOptions?: Partial<MapOptions>
-): MapOptions => ({
-  container,
-  style: createMapStyle(),
-  center,
-  zoom,
-  pitch: 0,
-  bearing: 0,
-  attributionControl: false,
-  renderWorldCopies: false,
-  maxTileCacheSize: 50,
-  ...customOptions
-});
+  customOptions?: Partial<MapOptions> & { useFallback?: boolean }
+): MapOptions => {
+  const { useFallback = false, ...otherOptions } = customOptions || {};
+  
+  return {
+    container,
+    style: createMapStyle(useFallback),
+    center,
+    zoom,
+    pitch: 0,
+    bearing: 0,
+    attributionControl: false,
+    renderWorldCopies: false,
+    maxTileCacheSize: 50,
+    ...otherOptions
+  };
+};
 
 /**
- * Shared error handling for map tile failures
+ * Enhanced error handling for map failures with MapTiler fallback strategy
  */
 export const handleMapError = (
   e: any,
@@ -126,9 +152,30 @@ export const handleMapError = (
 ): void => {
   console.error('Map error:', e);
   
-  // Try fallback dark tiles if primary fails
-  if (e.error && e.error.message && e.error.message.includes('dark-tiles')) {
-    console.log('Switching to fallback dark tiles...');
+  // Check if it's a MapTiler style loading error
+  if (e.error && (e.error.message?.includes('maptiler') || e.error.message?.includes('style') || e.sourceId)) {
+    console.log('MapTiler style failed, switching to fallback raster tiles...');
+    
+    try {
+      // Replace the entire style with fallback configuration
+      const fallbackStyle = createFallbackMapStyle();
+      map?.setStyle(fallbackStyle as any);
+      
+      console.log('Successfully switched to fallback raster style');
+      
+      // Wait for style to load then add any additional error handling
+      map?.once('styledata', () => {
+        console.log('Fallback style loaded successfully');
+      });
+      
+    } catch (fallbackError) {
+      console.error('Fallback style also failed:', fallbackError);
+      onError('Failed to load map. Please check your internet connection.');
+    }
+  } 
+  // Handle traditional raster tile failures
+  else if (e.error && e.error.message && e.error.message.includes('dark-tiles')) {
+    console.log('Switching to secondary fallback tiles...');
     
     try {
       // Remove failed source and add fallback
@@ -153,13 +200,13 @@ export const handleMapError = (
         }
       });
       
-      console.log('Fallback tiles loaded successfully');
+      console.log('Secondary fallback tiles loaded successfully');
     } catch (fallbackError) {
-      console.error('Fallback tiles also failed:', fallbackError);
+      console.error('All fallback options failed:', fallbackError);
       onError('Failed to load map tiles. Please check your internet connection.');
     }
   } else {
-    onError('Failed to load map tiles');
+    onError('Failed to load map');
   }
 };
 

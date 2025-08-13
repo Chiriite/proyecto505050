@@ -417,7 +417,7 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                       </svg>
                     </button>
                   ) : (
-                    <div className="text-white/40 text-sm italic">Final</div>
+                    <div className="text-white/40 text-sm italic"></div>
                   )}
                 </div>
               </div>
