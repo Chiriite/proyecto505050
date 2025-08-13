@@ -82,28 +82,35 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
   useEffect(() => {
     const loadLocalPhotos = () => {
       const cityId = city.id.toString();
-      
-      // Solo incluir las fotos que sabemos que existen
-      // Puedes ajustar esto según qué fotos estén disponibles para cada ciudad
       const localPhotos: CityPhoto[] = [];
       
-      // Agregar fotos solo si están disponibles
-      if (cityId === '49' || cityId === '50') {
-        // Estas ciudades tienen 3 fotos
-        localPhotos.push(
-          { id: '1', photo_url: `/images/${cityId}/1.webp`, caption: `Imagen 1 de ${city.name}` },
-          { id: '2', photo_url: `/images/${cityId}/2.webp`, caption: `Imagen 2 de ${city.name}` },
-          { id: '3', photo_url: `/images/${cityId}/3.webp`, caption: `Imagen 3 de ${city.name}` }
-        );
-      } else {
-        // Otras ciudades pueden tener menos fotos
-        localPhotos.push(
-          { id: '1', photo_url: `/images/${cityId}/1.webp`, caption: `Imagen 1 de ${city.name}` },
-          { id: '2', photo_url: `/images/${cityId}/2.webp`, caption: `Imagen 2 de ${city.name}` }
-        );
-      }
+      // Verificar qué fotos están disponibles para esta ciudad
+      const checkPhotoExists = (photoNum: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = `/images/${cityId}/${photoNum}.webp`;
+        });
+      };
       
-      setCityPhotos(localPhotos);
+      // Función async para verificar todas las fotos
+      const checkAllPhotos = async () => {
+        for (let i = 1; i <= 3; i++) {
+          const photoNum = i.toString();
+          const exists = await checkPhotoExists(photoNum);
+          if (exists) {
+            localPhotos.push({
+              id: photoNum,
+              photo_url: `/images/${cityId}/${photoNum}.webp`,
+              caption: `Imagen ${photoNum} de ${city.name}`
+            });
+          }
+        }
+        setCityPhotos(localPhotos);
+      };
+      
+      checkAllPhotos();
     };
     
     loadLocalPhotos();
@@ -394,7 +401,12 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                  onTouchEnd={(e) => e.stopPropagation()}
             >
               <div className="p-6">
-                <h3 className="text-xl font-medium text-center text-white mb-4">Fotos en {city.name}</h3>
+                <div className="flex items-center justify-center mb-4">
+                  <svg className="w-5 h-5 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <h3 className="text-lg text-white">Fotos en <span className="text-[#FF8C00] font-bold">{city.name}</span></h3>
+                </div>
                 
                 <PhotoGallery photos={cityPhotos} cityName={city.name} /> 
                 
