@@ -255,7 +255,7 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
         <div className="absolute inset-0 bg-background/90 backdrop-blur-sm flex items-center justify-center z-[2000]">
           <div className="text-center">
             <div className="w-12 h-12 border-3 border-border border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-text-primary">Loading {city.name}...</p>
+            <p className="text-text-primary">Cargando {city.name}...</p>
           </div>
         </div>
       )}
@@ -317,7 +317,7 @@ export default function CityDetailView({ city, nextCity, prevCity }: CityDetailV
                  onTouchEnd={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col items-center p-6 border-b border-white/10">
-                <div className="w-12 h-1 bg-white/10 mb-4 rounded-full"></div>
+                <div className="block md:hidden w-12 h-1 bg-white/10 mb-4 rounded-full"></div>
 
                 <div className="flex w-full items-center justify-between">
                   <h1 className="text-3xl font-bold text-white mb-2">

@@ -7,63 +7,48 @@ const info50=["Km", "Días", "Provincias"]
 ---
 
 <Layout title="Acerca del Proyecto 50-50-50">
-  <main class="min-h-screen bg-black p-8 w-full flex flex-col items-center gap-10">
+  <main class="bg-black p-8 w-full flex flex-col items-center gap-10">
     <header class="w-full flex justify-between items-start">
       <aside class="flex flex-col gap-2 max-w-[70%]">
-        <h1 class="text-2xl md:text-4xl font-bold text-white">Información</h1>
-        <h2 class="text-md md:text-lg text-white/50">Acerca del Proyecto 50-50-50</h2>
+        <h1 class="text-4xl md:text-6xl font-bold text-white">Información</h1>
+        <h2 class="text-lg md:text-2xl text-white/50">Acerca del Proyecto 50-50-50</h2>
         
         <p class="mt-4 text-white/40">Plataforma no oficial creada por <a class="text-[#F59E0B] hover:underline" href="https://x.com/chiriite_SD" target="_blank">@chiriite_SD</a></p>
       </aside>
       <Back />
     </header>
 
-    <div class="group flex flex-col gap-4 bg-white/5 border border-white/10 p-4 md:p-8 rounded-lg w-full min-h-[240px] md:min-h-[320px] relative mt-4 hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(255,140,0,0.1)] transition-all duration-500">
-      <p class="text-sm md:text-md text-white/60 pr-48 md:pr-10">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.</p>
-      <img src="/images/presentation.png" alt="Presentación" class="absolute bottom-0 right-0 md:right-12 w-auto h-[30vh] md:h-[60vh]">
+    <div class="group flex flex-col gap-4 bg-white/5 border border-white/10 p-4 md:p-8 rounded-lg w-full min-h-[240px] md:min-h-[320px] relative hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(255,140,0,0.1)] transition-all duration-500">
+      <p class="text-md md:text-lg text-white/60 pr-40 w-full md:w-[80%]">El proyecto consiste en correr 50 km diarios durante 50 días por 50 provincias españolas para recaudar fondos para la <a class="text-white hover:underline" href="https://www.fundacionjuegaterapia.org/" target="_blank">Juegaterapia</a> y crear áreas de juego para niños con cáncer.</p>
+      <img src="/images/presentation.png" alt="Presentación" class="absolute bottom-0 -right-4 md:right-12 w-auto h-[30vh] md:h-[60vh]">
     </div>
 
     <div class="grid grid-cols-3 gap-4 w-full">
       {info50.map((item) => (
         <div class="group flex flex-col items-center justify-center border border-white/10 p-4 rounded-lg bg-white/5 hover:bg-[#F59E0B] transition-all duration-500 hover:scale-[1.02] cursor-pointer">
-          <h2 class="text-8xl font-bold text-white text-[#F59E0B] group-hover:text-black">50</h2>
-          <h3 class="text-lg text-white/40 group-hover:text-black">{item}</h3>
+          <h2 class="text-5xl md:text-8xl font-bold text-white text-[#F59E0B] group-hover:text-black">50</h2>
+          <h3 class="text-md md:text-lg text-white/40 group-hover:text-black">{item}</h3>
         </div>
       ))}
     </div>
 
     <div class="flex flex-col gap-4 w-full">
-      <h2 class="text-4xl font-bold text-white text-center">Dona</h2>
-      <p class="text-white/40">
-        El Proyecto 50-50-50 es un proyecto de carácter personal que consiste en recorrer 50 kilómetros en 50 días en 50 provincias de España.
+      <h2 class="text-2xl font-bold text-white text-center flex items-center justify-center gap-2">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+        Donaciones
+      </h2>
+      <p class="text-white/40 text-center">
+        Puedes donar a Juegaterapia, que busca crear espacios de juego en hospitales para niños con cáncer. Cada aportación, grande o pequeña, ayuda a transformar su estancia en un momento más alegre y humano.
       </p>
-      <a href="https://www.migranodearena.org/reto/proyecto-50-50-50-50-d-as-50-kil-metros-50-provincias-espa-olas" class=" border border-white/10 p-4 rounded-lg text-black bg-[#F59E0B] text-center text-md md:text-lg transition-all duration-500 hover:scale-[1.02]">
+      <a href="https://www.migranodearena.org/reto/proyecto-50-50-50-50-d-as-50-kil-metros-50-provincias-espa-olas" class=" border border-white/10 p-4 rounded-lg text-black bg-[#F59E0B] text-center text-lg md:text-xl font-medium transition-all duration-500 hover:scale-[1.02] flex items-center justify-center gap-2 group">
         Dona aquí
+        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l10-10M17 17V7H7"/>
+        </svg>
       </a>
     </div>
   </main>
-  
   <Footer />
 </Layout>
-
-<style>
-  /* Mobile optimizations */
-  @media (max-width: 768px) {
-    .container {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-    
-    h1 {
-      font-size: 2.5rem;
-    }
-    
-    h2 {
-      font-size: 2rem;
-    }
-    
-    .prose p {
-      font-size: 1rem;
-    }
-  }
-</style>

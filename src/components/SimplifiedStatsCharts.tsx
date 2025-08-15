@@ -38,7 +38,7 @@ const prepareChartData = () => {
 // Calculate average values
 const calculateAverages = () => {
   const data = prepareChartData();
-  const distances = data.filter(city => city.distance).map(city => city.distance!);
+  const distances = data.filter(city => city.distance_km).map(city => city.distance_km!);
   const times = data.filter(city => city.time).map(city => city.timeMinutes);
   const paces = data.filter(city => city.pace).map(city => city.paceMinutesPerKm);
   const elevations = data.filter(city => city.elevation).map(city => city.elevation!);
@@ -77,7 +77,7 @@ const SimplifiedStatsCharts: React.FC = () => {
   const maxPaceValue = Math.max(...chartData.map(city => city.paceMinutesPerKm));
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-6 md:space-y-8 w-full">
       {/* Valores Promedios */}
       <div className="bg-black/60 rounded-xl md:rounded-2xl border border-gray-800/40 p-4 md:p-8 backdrop-blur-sm shadow-xl shadow-black/60">
         <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
