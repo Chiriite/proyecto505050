@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import GradientBackground from '../../components/GradientBackground.astro';
 import SimplifiedStatsCharts from '../../components/SimplifiedStatsCharts';
 import RecordsGrid from '../../components/RecordsGrid';
+import Footer from '../../components/Footer.astro';
 ---
 
 <Layout title="Estadísticas - Proyecto 50/50/50">
@@ -44,20 +45,6 @@ import RecordsGrid from '../../components/RecordsGrid';
           </div>
         </div>
 
-        <div class="lg:row-span-2 bg-black/60 rounded-xl border border-gray-800/40 p-4 backdrop-blur-sm shadow-xl shadow-black/60">
-          <div class="flex justify-center">
-            <iframe 
-              allowtransparency="true" 
-              frameborder="0" 
-              width="280" 
-              height="450" 
-              scrolling="no" 
-              src="https://www.migranodearena.org/widget/proyecto-50-50-50-50-d-as-50-kil-metros-50-provincias-espa-olas"
-              class="rounded-lg"
-            ></iframe>
-          </div>
-        </div>
-
         <!-- Mejor Ritmo - Bottom left (spans 2 columns) -->
         <div class="lg:col-span-2 bg-gradient-to-br from-green-950/70 to-black/50 rounded-xl border border-green-900/30 p-4 md:p-6 backdrop-blur-sm shadow-xl shadow-black/60">
           <div class="flex items-center justify-between">
@@ -83,5 +70,7 @@ import RecordsGrid from '../../components/RecordsGrid';
         <RecordsGrid client:load />
       </div>
     </div>
+
+    <Footer />
   </GradientBackground>
 </Layout>

@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import CityDetailView from '../../components/CityDetailView.tsx';
 import { citiesArray } from '../../hooks/useMapState';
+import Back from '../../components/Back.astro';
 
 // Required function for Astro dynamic routes - generates all possible city pages
 export async function getStaticPaths() {
@@ -35,31 +36,7 @@ const prevCity = citiesArray.find(c => c.order_number === city.order_number - 1)
     
     <!-- Back to Overview Button -->
     <div class="absolute top-6 left-6 z-[1001]">
-      <a 
-        href="/"
-        class="group relative overflow-hidden bg-black/90 border border-white/20 text-white w-12 h-12 rounded-xl backdrop-blur-2xl transition-all duration-300 ease-out hover:bg-black hover:border-primary hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-primary/20 flex items-center justify-center"
-        aria-label="Back to map overview"
-      >
-        <!-- Background glow effect -->
-        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        
-        <!-- Icon -->
-        <div class="relative z-10">
-          <svg 
-            class="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-0.5" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              stroke-linecap="round" 
-              stroke-linejoin="round" 
-              stroke-width={2} 
-              d="M10 19l-7-7m0 0l7-7m-7 7h18" 
-            />
-          </svg>
-        </div>
-      </a>
+      <Back />
     </div>
   </main>
 
