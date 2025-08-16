@@ -57,6 +57,12 @@ const SimplifiedStatsCharts: React.FC = () => {
   const chartData = prepareChartData();
   const averages = calculateAverages();
   
+  // CSS to remove chart focus outline
+  const chartStyle = {
+    outline: 'none',
+    border: 'none'
+  } as React.CSSProperties;
+  
   // Get min/max values for records
   const maxElevation = Math.max(...chartData.map(city => city.elevation || 0));
   const bestPace = Math.min(...chartData.map(city => city.paceMinutesPerKm));
@@ -109,7 +115,7 @@ const SimplifiedStatsCharts: React.FC = () => {
           <div className="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full mr-2 md:mr-3"></div>
           Gráfica de Tiempos
         </h3>
-        <div className="h-64 md:h-96">
+        <div className="h-64 md:h-96 [&_*]:!outline-none [&_*]:!border-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -141,7 +147,10 @@ const SimplifiedStatsCharts: React.FC = () => {
                   `${Math.floor(value / 60)}:${String(Math.round(value % 60)).padStart(2, '0')}`,
                   'Tiempo'
                 ]}
-                labelFormatter={(label) => `Ciudad ${label}`}
+                labelFormatter={(label) => {
+                  const city = chartData.find(c => c.orderNumber === label);
+                  return city ? city.name : `Ciudad ${label}`;
+                }}
               />
               <Line 
                 type="monotone" 
@@ -162,7 +171,7 @@ const SimplifiedStatsCharts: React.FC = () => {
           <div className="w-2 h-2 md:w-3 md:h-3 bg-orange-500 rounded-full mr-2 md:mr-3"></div>
           Gráfica del desnivel
         </h3>
-        <div className="h-64 md:h-96">
+        <div className="h-64 md:h-96 [&_*]:!outline-none [&_*]:!border-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
@@ -197,7 +206,10 @@ const SimplifiedStatsCharts: React.FC = () => {
                   boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
                 }}
                 formatter={(value: any) => [`${value}m`, 'Elevación']}
-                labelFormatter={(label) => `Ciudad ${label}`}
+                labelFormatter={(label) => {
+                  const city = chartData.find(c => c.orderNumber === label);
+                  return city ? city.name : `Ciudad ${label}`;
+                }}
               />
               <Area 
                 type="monotone" 
@@ -219,7 +231,7 @@ const SimplifiedStatsCharts: React.FC = () => {
           <div className="w-2 h-2 md:w-3 md:h-3 bg-orange-500 rounded-full mr-2 md:mr-3"></div>
           Correlación Desnivel-Ritmo
         </h3>
-        <div className="h-64 md:h-96">
+        <div className="h-64 md:h-96 [&_*]:!outline-none [&_*]:!border-0">
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -247,15 +259,34 @@ const SimplifiedStatsCharts: React.FC = () => {
                   backgroundColor: '#374151 !important', 
                   border: '1px solid #4B5563 !important',
                   borderRadius: '12px !important',
-                  color: '#FFFFFF !importan t',
+                  color: '#FFFFFF !important',
                   fontSize: '14px !important',
                   boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3) !important',
                   zIndex: 1000
                 }}
-                formatter={(value: any, name: string) => [
-                  name === 'elevation' ? `${value}m` : `${Math.floor(value)}:${String(Math.round((value % 1) * 60)).padStart(2, '0')}`,
-                  name === 'elevation' ? 'Elevación' : 'Ritmo'
-                ]}
+                content={(props) => {
+                  if (props.active && props.payload && props.payload[0]) {
+                    const data = props.payload[0].payload;
+                    return (
+                      <div style={{
+                        backgroundColor: '#374151',
+                        border: '1px solid #4B5563',
+                        borderRadius: '12px',
+                        color: '#FFFFFF',
+                        fontSize: '14px',
+                        padding: '8px 12px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
+                      }}>
+                        <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>{data.name}</p>
+                        <p style={{ margin: '2px 0', color: '#FF8C00' }}>Desnivel: {data.elevation}m</p>
+                        <p style={{ margin: '2px 0', color: '#3B82F6' }}>
+                          Ritmo: {Math.floor(data.paceMinutesPerKm)}:{String(Math.round((data.paceMinutesPerKm % 1) * 60)).padStart(2, '0')} min/km
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
               />
               <Scatter 
                 name="Ciudades" 

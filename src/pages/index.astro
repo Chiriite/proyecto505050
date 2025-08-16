@@ -5,10 +5,10 @@ import Button from '../components/Button.astro';
 ---
 
 <Layout title="Proyecto 50-50-50">
-  <main class="relative w-full h-screen overflow-hidden">
+  <main class="relative w-full h-screen-safe overflow-hidden">
 
     <!-- Top Left - Logo -->
-    <div class="absolute top-8 left-8 z-[1000]">
+    <div class="absolute top-6 left-6 z-[1000]">
       <Button 
         href="/" 
         variant="gray" 
@@ -18,7 +18,7 @@ import Button from '../components/Button.astro';
     </div>
 
     <!-- Top Navigation Buttons -->
-    <div class="absolute top-8 right-8 z-[1000] flex gap-4">
+    <div class="absolute top-6 right-6 z-[1000] flex gap-4">
       <Button 
         href="/info"  
         variant="gray" 
@@ -34,7 +34,7 @@ import Button from '../components/Button.astro';
     </div>
 
     <!-- Bottom Left - Donate Button -->
-    <div class="absolute bottom-8 left-8 z-[1000]">
+    <div class="absolute bottom-6 left-6 z-[1000]">
       <Button 
         href="https://www.migranodearena.org/reto/proyecto-50-50-50-50-d-as-50-kil-metros-50-provincias-espa-olas" 
         isBlank 
@@ -47,7 +47,7 @@ import Button from '../components/Button.astro';
     </div>
 
     <!-- Bottom Right - Start Journey Button -->
-    <div class="absolute bottom-8 right-8 z-[1000]">
+    <div class="absolute bottom-6 right-6 z-[1000]">
       <Button 
         href="/c/1"  
         variant="orange" 

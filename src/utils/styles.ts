@@ -24,7 +24,7 @@ export const styles = {
   cityMarker: 'w-9 h-9 bg-primary text-black border-3 border-text-primary rounded-full flex items-center justify-center font-bold text-sm cursor-pointer transition-all duration-300 ease-in-out shadow-glow hover:scale-110 hover:shadow-glow-lg hover:border-primary',
   
   // Layout utilities
-  fullScreen: 'w-full h-screen',
+  fullScreen: 'w-full h-screen-safe',
   centerContent: 'flex items-center justify-center',
   overlay: 'absolute inset-0',
   

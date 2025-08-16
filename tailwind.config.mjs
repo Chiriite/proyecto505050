@@ -71,6 +71,12 @@ export default {
       borderWidth: {
         '3': '3px',
       },
+      // Mobile-safe viewport height utilities
+      height: {
+        'screen-safe': ['100vh', '100dvh'], // Fallback to vh, prefer dvh for mobile
+        'screen-mobile': '100dvh', // Dynamic viewport height for mobile
+        'screen-full': ['100vh', '100svh'], // Small viewport height (always visible)
+      },
     },
   },
   plugins: [],
