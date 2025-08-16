@@ -118,6 +118,24 @@ export const createMapStyle = (useFallback = false): string | MapStyleConfig => 
 };
 
 /**
+ * Detect if user is on mobile device
+ */
+export const isMobileDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  // Check viewport width
+  const isMobileWidth = window.innerWidth <= 768;
+  
+  // Check user agent for mobile patterns
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Check touch support
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+  return isMobileWidth || (isMobileUA && isTouchDevice);
+};
+
+/**
  * Create base map options with shared configuration
  */
 export const createMapOptions = (
@@ -232,7 +250,8 @@ export const setupResizeHandler = (map: maplibregl.Map): (() => void) => {
  */
 export const SPAIN_MAP_CONFIG = {
   center: [-3.7038, 40.4168] as [number, number],
-  zoom: 5.8
+  zoom: 5.8,
+  mobileZoom: 5.4 // Lower zoom for mobile devices
 };
 
 /**

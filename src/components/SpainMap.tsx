@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { clsx } from 'clsx';
 import { type City, citiesArray } from '../hooks/useMapState';
-import { createMapOptions, handleMapError, setupResizeHandler, SPAIN_MAP_CONFIG } from '../utils/mapConfig';
+import { createMapOptions, handleMapError, setupResizeHandler, SPAIN_MAP_CONFIG, isMobileDevice } from '../utils/mapConfig';
 import { generateRouteConnections, validateRouteConnections } from '../utils/routeUtils';
 
 interface SpainMapProps {
@@ -28,10 +28,13 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
       console.log('Initializing map...');
       console.log('Cities available:', cities.length);
       
+      // Use mobile zoom if on mobile device
+      const initialZoom = isMobileDevice() ? SPAIN_MAP_CONFIG.mobileZoom : SPAIN_MAP_CONFIG.zoom;
+      
       const mapOptions = createMapOptions(
         mapContainer.current,
         SPAIN_MAP_CONFIG.center,
-        SPAIN_MAP_CONFIG.zoom
+        initialZoom
       );
       
       map.current = new maplibregl.Map(mapOptions as maplibregl.MapOptions);
@@ -195,9 +198,12 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
   };
 
   const resetView = () => {
+    // Use appropriate zoom level for current device
+    const resetZoom = isMobileDevice() ? SPAIN_MAP_CONFIG.mobileZoom : SPAIN_MAP_CONFIG.zoom;
+    
     map.current?.flyTo({
       center: SPAIN_MAP_CONFIG.center,
-      zoom: SPAIN_MAP_CONFIG.zoom,
+      zoom: resetZoom,
       duration: 1000
     });
   };
