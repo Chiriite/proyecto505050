@@ -1,23 +1,80 @@
 ---
 export interface Props {
   href: string;
-  text: string;
+  text?: string;
+  icon?: string;
   variant?: 'orange' | 'gray' | 'blue';
+  size?: 'small' | 'medium' | 'large';
   class?: string;
   isBlank?: boolean;
 }
 
-const { href, text, variant = 'orange', class: className = '', isBlank = false } = Astro.props;
+const { href, text, icon, variant = 'orange', size = 'medium', class: className = '', isBlank = false } = Astro.props;
 
 const variantStyles = {
-  orange: 'from-orange-500/20 to-orange-600/20 border-orange-500/30 hover:from-orange-500/30 hover:to-orange-600/30 hover:border-orange-500/50',
-  gray: 'from-gray-500/20 to-gray-600/20 border-gray-500/30 hover:from-gray-500/30 hover:to-gray-600/30 hover:border-gray-500/50',
-  blue: 'from-blue-500/20 to-blue-600/20 border-blue-500/30 hover:from-blue-500/30 hover:to-blue-600/30 hover:border-blue-500/50'
+  orange: 'bg-orange-500/50 border-orange-500/20 hover:bg-orange-500/20 hover:border-orange-500/40 focus:ring-orange-500/50',
+  gray: 'bg-black/40 border-white/10 hover:bg-white/10 hover:border-white/20 focus:ring-white/30',
+  blue: 'bg-blue-500/50 border-blue-500/20 hover:bg-blue-500/20 hover:border-blue-500/40 focus:ring-blue-500/50'
+};
+
+const sizeStyles = {
+  small: (icon && text) ? 'px-4 py-3 rounded-xl min-w-20 h-16' : icon ? 'w-16 h-16 rounded-xl' : 'px-6 py-3 rounded-xl min-w-16 h-16',
+  medium: (icon && text) ? 'px-6 py-4 rounded-2xl min-w-24 h-20' : icon ? 'w-20 h-20 rounded-2xl' : 'px-8 py-4 rounded-2xl min-w-20 h-20',
+  large: (icon && text) ? 'px-8 py-5 rounded-3xl min-w-28 h-24' : icon ? 'w-24 h-24 rounded-3xl' : 'px-10 py-5 rounded-3xl min-w-24 h-24'
+};
+
+const iconSizes = {
+  small: 'w-6 h-6',
+  medium: 'w-8 h-8',
+  large: 'w-10 h-10'
+};
+
+const textSizes = {
+  small: 'text-sm font-medium',
+  medium: 'text-lg font-medium',
+  large: 'text-xl font-semibold'
 };
 ---
 
-<a href={href} target={isBlank ? '_blank' : '_self'} class={`text-white/70 hover:text-white transition-all duration-300 group ${className}`}>
-  <div class={`bg-gradient-to-r ${variantStyles[variant]} backdrop-blur-sm border rounded-2xl px-6 py-3 transition-all duration-300`}>
-    <span class="text-lg font-medium text-white/80 group-hover:text-white">{text}</span>
+<a 
+  href={href} 
+  target={isBlank ? '_blank' : '_self'} 
+  class={`inline-block transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black/50 rounded-xl ${className}`}
+  title={text}
+  role="button"
+  tabindex="0"
+>
+  <div class={`${variantStyles[variant]} ${sizeStyles[size]} border backdrop-blur-sm transition-all duration-200 ease-out flex items-center justify-center relative overflow-hidden group`}>
+    <!-- Subtle shine effect -->
+    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
+    </div>
+    
+    {icon && text ? (
+      <div class="flex items-center gap-2 relative z-10">
+        <svg 
+          class={`${iconSizes[size]} fill-current text-white/70 group-hover:text-white transition-colors duration-200`} 
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d={icon}></path>
+        </svg>
+        <span class={`${textSizes[size]} text-white/70 group-hover:text-white transition-colors duration-200 whitespace-nowrap`}>
+          {text}
+        </span>
+      </div>
+    ) : icon ? (
+      <svg 
+        class={`${iconSizes[size]} fill-current text-white/70 group-hover:text-white transition-colors duration-200 relative z-10`} 
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path d={icon}></path>
+      </svg>
+    ) : (
+      <span class={`${textSizes[size]} text-white/70 group-hover:text-white transition-colors duration-200 relative z-10 whitespace-nowrap`}>
+        {text}
+      </span>
+    )}
   </div>
 </a>
