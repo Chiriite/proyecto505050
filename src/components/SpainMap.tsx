@@ -3,6 +3,7 @@ import maplibregl from 'maplibre-gl';
 import { clsx } from 'clsx';
 import { type City, citiesArray } from '../hooks/useMapState';
 import { createMapOptions, handleMapError, setupResizeHandler, SPAIN_MAP_CONFIG } from '../utils/mapConfig';
+import { generateRouteConnections, validateRouteConnections } from '../utils/routeUtils';
 
 interface SpainMapProps {
   onCitySelect?: (city: City) => void;
@@ -44,6 +45,7 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
       map.current.on('load', () => {
         if (map.current) {
           console.log('Map loaded successfully');
+          addRouteConnections();
           if (cities.length > 0) {
             addCityMarkers();
           }
@@ -135,6 +137,61 @@ export default function SpainMap({ onCitySelect }: SpainMapProps) {
         .setLngLat([city.longitude, city.latitude])
         .addTo(map.current!);
     });
+  };
+
+  const addRouteConnections = () => {
+    if (!map.current) return;
+
+    try {
+      // Use static cities data directly
+      const routeSegments = generateRouteConnections(citiesArray);
+
+      console.log(`Adding ${routeSegments.length} route segments`);
+      
+      // Create GeoJSON from route segments
+      const routeGeoJSON: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: routeSegments.map(segment => ({
+          type: 'Feature',
+          properties: {
+            order: segment.order,
+            fromCity: segment.from.name,
+            toCity: segment.to.name
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: segment.coordinates
+          }
+        }))
+      };
+
+      // Add source
+      map.current.addSource('journey-route-source', {
+        type: 'geojson',
+        data: routeGeoJSON
+      });
+
+      // Add layer
+      map.current.addLayer({
+        id: 'journey-route',
+        type: 'line',
+        source: 'journey-route-source',
+        paint: {
+          'line-color': '#FF8C00',
+          'line-width': 3,
+          'line-opacity': 0.8
+        },
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        }
+      });
+
+      console.log('Route connections added successfully');
+      
+    } catch (error) {
+      console.error('Failed to add route connections:', error);
+    }
   };
 
   const resetView = () => {
