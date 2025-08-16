@@ -42,24 +42,15 @@ const calculateAverages = () => {
   const times = data.filter(city => city.time).map(city => city.timeMinutes);
   const paces = data.filter(city => city.pace).map(city => city.paceMinutesPerKm);
   const elevations = data.filter(city => city.elevation).map(city => city.elevation!);
+  const humidity = data.filter(city => city.humidity).map(city => city.humidity!);
   
   return {
     avgDistance: distances.length > 0 ? distances.reduce((a, b) => a + b, 0) / distances.length : 0,
     avgTime: times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0,
     avgPace: paces.length > 0 ? paces.reduce((a, b) => a + b, 0) / paces.length : 0,
     avgElevation: elevations.length > 0 ? elevations.reduce((a, b) => a + b, 0) / elevations.length : 0,
+    avgHumidity: humidity.length > 0 ? humidity.reduce((a, b) => a + b, 0) / humidity.length : 0,
   };
-};
-
-// Get pace color for heatmap based on performance
-const getPaceColor = (pace: number, minPace: number, maxPace: number) => {
-  const normalizedPace = (pace - minPace) / (maxPace - minPace);
-  
-  if (normalizedPace < 0.2) return '#10B981'; // Green - excellent
-  if (normalizedPace < 0.4) return '#F59E0B'; // Yellow - good
-  if (normalizedPace < 0.6) return '#FF8C00'; // Orange - average
-  if (normalizedPace < 0.8) return '#EF4444'; // Red - poor
-  return '#7F1D1D'; // Dark red - very poor
 };
 
 const SimplifiedStatsCharts: React.FC = () => {
@@ -87,13 +78,7 @@ const SimplifiedStatsCharts: React.FC = () => {
         <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
           <div className="text-center p-3 md:p-0">
             <div className="text-xl md:text-3xl font-bold text-orange-500 mb-1 md:mb-2">
-              {averages.avgDistance.toFixed(1)}
-            </div>
-            <div className="text-xs md:text-sm text-gray-300">Distancia Media (km)</div>
-          </div>
-          <div className="text-center p-3 md:p-0">
-            <div className="text-xl md:text-3xl font-bold text-orange-500 mb-1 md:mb-2">
-              {Math.floor(averages.avgTime / 60)}:{String(Math.round(averages.avgTime % 60)).padStart(2, '0')}
+              {Math.floor(averages.avgTime / 60)}h {String(Math.round(averages.avgTime % 60)).padStart(2, '0')}min
             </div>
             <div className="text-xs md:text-sm text-gray-300">Tiempo Medio</div>
           </div>
@@ -101,14 +86,73 @@ const SimplifiedStatsCharts: React.FC = () => {
             <div className="text-xl md:text-3xl font-bold text-orange-500 mb-1 md:mb-2">
               {Math.floor(averages.avgPace)}:{String(Math.round((averages.avgPace % 1) * 60)).padStart(2, '0')}
             </div>
-            <div className="text-xs md:text-sm text-gray-300">Ritmo Medio</div>
+            <div className="text-xs md:text-sm text-gray-300">Ritmo Medio (min/km)</div>
           </div>
           <div className="text-center p-3 md:p-0">
             <div className="text-xl md:text-3xl font-bold text-orange-500 mb-1 md:mb-2">
               {Math.round(averages.avgElevation)}
             </div>
-            <div className="text-xs md:text-sm text-gray-300">Elevación Media (m)</div>
+            <div className="text-xs md:text-sm text-gray-300">Desnivel Medio (m)</div>
           </div>
+          <div className="text-center p-3 md:p-0">
+            <div className="text-xl md:text-3xl font-bold text-orange-500 mb-1 md:mb-2">
+              {averages.avgHumidity.toFixed(1)}%
+            </div>
+            <div className="text-xs md:text-sm text-gray-300">Humedad Media</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Gráfica de Tiempos */}
+      <div className="bg-black/60 rounded-xl md:rounded-2xl border border-gray-800/40 p-4 md:p-8 backdrop-blur-sm shadow-xl shadow-black/60">
+        <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
+          <div className="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full mr-2 md:mr-3"></div>
+          Gráfica de Tiempos
+        </h3>
+        <div className="h-64 md:h-96">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis 
+                dataKey="orderNumber" 
+                stroke="#9CA3AF"
+                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                tickLine={{ stroke: '#9CA3AF' }}
+                axisLine={{ stroke: '#9CA3AF' }}
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                stroke="#9CA3AF"
+                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                tickLine={{ stroke: '#9CA3AF' }}
+                axisLine={{ stroke: '#9CA3AF' }}
+                width={50}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#374151', 
+                  border: '1px solid #4B5563',
+                  borderRadius: '12px',
+                  color: '#FFFFFF',
+                  fontSize: '14px',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
+                }}
+                formatter={(value: any) => [
+                  `${Math.floor(value / 60)}:${String(Math.round(value % 60)).padStart(2, '0')}`,
+                  'Tiempo'
+                ]}
+                labelFormatter={(label) => `Ciudad ${label}`}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="timeMinutes" 
+                stroke="#3B82F6" 
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 6, fill: '#3B82F6', strokeWidth: 2 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -116,7 +160,7 @@ const SimplifiedStatsCharts: React.FC = () => {
       <div className="bg-black/60 rounded-xl md:rounded-2xl border border-gray-800/40 p-4 md:p-8 backdrop-blur-sm shadow-xl shadow-black/60">
         <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
           <div className="w-2 h-2 md:w-3 md:h-3 bg-orange-500 rounded-full mr-2 md:mr-3"></div>
-          Gráfica de la Elevación
+          Gráfica del desnivel
         </h3>
         <div className="h-64 md:h-96">
           <ResponsiveContainer width="100%" height="100%">
@@ -145,11 +189,12 @@ const SimplifiedStatsCharts: React.FC = () => {
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#1F2937', 
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#F3F4F6',
-                  fontSize: '14px'
+                  backgroundColor: '#374151', 
+                  border: '1px solid #4B5563',
+                  borderRadius: '12px',
+                  color: '#FFFFFF',
+                  fontSize: '14px',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
                 }}
                 formatter={(value: any) => [`${value}m`, 'Elevación']}
                 labelFormatter={(label) => `Ciudad ${label}`}
@@ -168,64 +213,11 @@ const SimplifiedStatsCharts: React.FC = () => {
         </div>
       </div>
 
-
-      {/* Gráfica de Tiempos */}
-      <div className="bg-black/60 rounded-xl md:rounded-2xl border border-gray-800/40 p-4 md:p-8 backdrop-blur-sm shadow-xl shadow-black/60">
-        <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
-          <div className="w-2 h-2 md:w-3 md:h-3 bg-orange-500 rounded-full mr-2 md:mr-3"></div>
-          Gráfica de Tiempos
-        </h3>
-        <div className="h-64 md:h-96">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="orderNumber" 
-                stroke="#9CA3AF"
-                tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                tickLine={{ stroke: '#9CA3AF' }}
-                axisLine={{ stroke: '#9CA3AF' }}
-                interval="preserveStartEnd"
-              />
-              <YAxis 
-                stroke="#9CA3AF"
-                tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                tickLine={{ stroke: '#9CA3AF' }}
-                axisLine={{ stroke: '#9CA3AF' }}
-                width={50}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1F2937', 
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#F3F4F6',
-                  fontSize: '14px'
-                }}
-                formatter={(value: any) => [
-                  `${Math.floor(value / 60)}:${String(Math.round(value % 60)).padStart(2, '0')}`,
-                  'Tiempo'
-                ]}
-                labelFormatter={(label) => `Ciudad ${label}`}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="timeMinutes" 
-                stroke="#3B82F6" 
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 6, fill: '#3B82F6', strokeWidth: 2 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
       {/* Correlación Elevación-Ritmo */}
       <div className="bg-black/60 rounded-xl md:rounded-2xl border border-gray-800/40 p-4 md:p-8 backdrop-blur-sm shadow-xl shadow-black/60">
         <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center">
           <div className="w-2 h-2 md:w-3 md:h-3 bg-orange-500 rounded-full mr-2 md:mr-3"></div>
-          Correlación Elevación-Ritmo
+          Correlación Desnivel-Ritmo
         </h3>
         <div className="h-64 md:h-96">
           <ResponsiveContainer width="100%" height="100%">
@@ -252,11 +244,13 @@ const SimplifiedStatsCharts: React.FC = () => {
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#1F2937', 
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#F3F4F6',
-                  fontSize: '14px'
+                  backgroundColor: '#374151 !important', 
+                  border: '1px solid #4B5563 !important',
+                  borderRadius: '12px !important',
+                  color: '#FFFFFF !importan t',
+                  fontSize: '14px !important',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3) !important',
+                  zIndex: 1000
                 }}
                 formatter={(value: any, name: string) => [
                   name === 'elevation' ? `${value}m` : `${Math.floor(value)}:${String(Math.round((value % 1) * 60)).padStart(2, '0')}`,
